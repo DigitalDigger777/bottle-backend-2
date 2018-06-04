@@ -33,7 +33,8 @@ class UserController extends Controller
             $result = [
                 'error' => [
                     'code' => 1001,
-                    'message' => 'Phone number is not correct'
+                    'message' => 'Phone number is not correct',
+                    'json' => json_encode($request->request->all())
                 ]
             ];
 

@@ -21,13 +21,13 @@ class UserController extends Controller
     public function registrationPhone(Request $request)
     {
         $isDebug = $this->get('kernel')->isDebug();
-        $phone = $request->request->get('phone');
+        $requestJSON = json_decode($request->getContent());
 
         $em = $this->getDoctrine()->getManager();
         $httpCode = 200;
 
 
-        if (!$phone) {
+        if ($requestJSON && !$requestJSON->phone) {
 
             $httpCode = 500;
             $result = [
@@ -43,7 +43,7 @@ class UserController extends Controller
 
             try {
                 $user = $em->getRepository(User::class)->findOneBy([
-                    'phone' => $phone
+                    'phone' => $requestJSON->phone
                 ]);
 
                 if ($user) {
@@ -52,7 +52,7 @@ class UserController extends Controller
                     $result = [
                         'error' => [
                             'code' => 1000,
-                            'message' => 'Phone number ' . $phone . ' has be register early'
+                            'message' => 'Phone number ' . $requestJSON->phone . ' has be register early'
                         ]
                     ];
                 }
@@ -62,7 +62,7 @@ class UserController extends Controller
                 $verificationCode = rand(1000, 9999);
 
                 $user = new User();
-                $user->setPhone($phone);
+                $user->setPhone($requestJSON->phone);
                 $user->setVerificationCode($verificationCode);
                 $user->setIsVerify(false);
 

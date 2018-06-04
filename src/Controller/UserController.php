@@ -21,7 +21,8 @@ class UserController extends Controller
     public function registrationPhone(Request $request)
     {
         $isDebug = $this->get('kernel')->isDebug();
-        $phone = $request->query->get('phone');
+        $phone = $request->request->get('phone');
+
         $em = $this->getDoctrine()->getManager();
         $httpCode = 200;
 
@@ -44,14 +45,16 @@ class UserController extends Controller
                     'phone' => $phone
                 ]);
 
-                $httpCode = 500;
+                if ($user) {
+                    $httpCode = 500;
 
-                $result = [
-                    'error' => [
-                        'code' => 1000,
-                        'message' => 'Phone number ' . $user->getPhone() . ' has be register early'
-                    ]
-                ];
+                    $result = [
+                        'error' => [
+                            'code' => 1000,
+                            'message' => 'Phone number ' . $phone . ' has be register early'
+                        ]
+                    ];
+                }
 
             } catch (NoResultException $e) {
                 //save new user

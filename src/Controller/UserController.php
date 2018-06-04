@@ -55,6 +55,8 @@ class UserController extends Controller
                             'message' => 'Phone number ' . $requestJSON->phone . ' has be register early'
                         ]
                     ];
+                } else {
+                    throw new NoResultException();
                 }
 
             } catch (NoResultException $e) {

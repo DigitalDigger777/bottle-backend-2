@@ -26,7 +26,6 @@ class UserController extends Controller
         $em = $this->getDoctrine()->getManager();
         $httpCode = 200;
 
-
         if ($requestJSON && !$requestJSON->phone) {
 
             $httpCode = 500;
@@ -80,6 +79,72 @@ class UserController extends Controller
                     $result['verificationCode'] = $verificationCode;
                 }
             }
+        }
+
+        return new JsonResponse($result, $httpCode);
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     *
+     * @Route("/user/registration-verify-code", name="user-registration-verify-code")
+     */
+    public function verifyPhone(Request $request)
+    {
+        /**
+         * @var User $user
+         */
+        $isDebug = $this->get('kernel')->isDebug();
+        $requestJSON = json_decode($request->getContent());
+
+        $em = $this->getDoctrine()->getManager();
+        $httpCode = 200;
+
+        if ($requestJSON && !$requestJSON->code) {
+
+            $httpCode = 500;
+            $result = [
+                'error' => [
+                    'code' => 1002,
+                    'message' => 'not correct request for verify code',
+                    'json' => json_encode($request->getContent())
+                ]
+            ];
+
+        } else {
+            //TODO: release check phone number
+
+            $user = $em->getRepository(User::class)->findOneBy([
+                'phone' => $requestJSON->phone,
+                'verificationCode' => $requestJSON->code,
+                'isVerify' => false
+            ]);
+
+            if (!$user) {
+                $httpCode = 500;
+
+                $result = [
+                    'error' => [
+                        'code' => 1003,
+                        'message' => 'not correct verify code'
+                    ]
+                ];
+            } else {
+                $user->setIsVerify(true);
+
+                $em->persist($user);
+                $em->flush();
+
+                $result = [
+                    'user' => [
+                        'id' => $user->getId(),
+                        'phone' => $user->getPhone()
+                    ]
+                ];
+            }
+
         }
 
         return new JsonResponse($result, $httpCode);

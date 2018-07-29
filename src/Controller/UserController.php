@@ -16,6 +16,65 @@ class UserController extends Controller
      *
      * @return \Symfony\Component\HttpFoundation\Response
      *
+     * @Route("/user/login", name="user-login")
+     */
+    public function login(Request $request)
+    {
+        /**
+         * @var User $user
+         */
+        $requestJSON = json_decode($request->getContent());
+        $httpCode = 200;
+
+        if ($requestJSON && $requestJSON->phone && $requestJSON->password) {
+            $em = $this->getDoctrine()->getManager();
+            $user = $em->getRepository(User::class)->findOneBy([
+                'phone' => $requestJSON->phone,
+                'password' => hash('sha256', $requestJSON->password)
+            ]);
+
+            if (!$user) {
+                $response = [
+                    'error' => [
+                        'code' => 10002,
+                        'message' => 'incorrect phone or password'
+                    ]
+                ];
+
+                $httpCode = 500;
+            } else {
+                $token = hash('sha256', time() . $user->getPhone() . $user->getPassword());
+                $user->setToken($token);
+
+                $em->persist($user);
+                $em->flush();
+
+                $response = [
+                    'user' => [
+                        'phone' => $user->getPhone(),
+                        'token' => $user->getToken()
+                    ]
+                ];
+            }
+        } else {
+            $response = [
+                'error' => [
+                    'code' => 40001,
+                    'message' => 'incorrect request'
+                ]
+            ];
+
+            $httpCode = 500;
+        }
+
+        return new JsonResponse($response, $httpCode);
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     *
      * @Route("/user/registration-phone", name="user-registration-phone")
      */
     public function registrationPhone(Request $request)

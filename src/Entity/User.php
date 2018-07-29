@@ -25,12 +25,22 @@ class User
     /**
      * @ORM\Column(type="string", length=255)
      */
+    private $password;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
     private $verificationCode;
 
     /**
      * @ORM\Column(type="boolean")
      */
     private $isVerify;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $token;
 
     public function getId()
     {
@@ -47,6 +57,22 @@ class User
         $this->phone = $phone;
 
         return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPassword()
+    {
+        return $this->password;
+    }
+
+    /**
+     * @param mixed $password
+     */
+    public function setPassword($password)
+    {
+        $this->password = $password;
     }
 
     /**
@@ -79,5 +105,21 @@ class User
     public function setIsVerify($isVerify)
     {
         $this->isVerify = $isVerify;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getToken()
+    {
+        return $this->token;
+    }
+
+    /**
+     * @param mixed $token
+     */
+    public function setToken($token)
+    {
+        $this->token = $token;
     }
 }
